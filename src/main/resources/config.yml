@@ -1,0 +1,33 @@
+# 리젠 대기 시간 (틱 단위)
+regen-duration: 20
+
+notification:
+  impossible-tool:
+    sound:
+      name: "minecraft:block.anvil.place"
+      volume: 0.5
+      pitch: 1
+    messages:
+      - "&c해당 도구로 캘 수 없습니다."
+
+  extra-drop:
+    sound:
+      name: "minecraft:entity.experience_orb.pickup"
+      volume: 1
+      pitch: 1
+    messages:
+      - "&a%item% %amount%개가 추가로 드랍되었습니다!"
+
+  bonus-drop:
+    sound:
+      name: "minecraft:entity.player.levelup"
+      volume: 1
+      pitch: 2
+    messages:
+      - "&a%item% %amount%개가 보너스로 드랍되었습니다!"
+    title:
+      main: "&a[ ! ]"
+      sub: "&f%item% %amount%개가 보너스로 드랍되었습니다!"
+      fade-in: 5
+      duration: 20
+      fade-out: 5
