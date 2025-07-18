@@ -12,12 +12,15 @@ import kr.hqservice.framework.inventory.button.HQButton
 import kr.hqservice.framework.inventory.button.HQButtonBuilder
 import kr.hqservice.framework.inventory.extension.setLeftClickFunction
 import org.bukkit.Material
+import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
+import org.bukkit.event.inventory.InventoryCloseEvent
 
 class OreDetailSettingView(
     private val oreGroupRegistry: OreGroupRegistry,
     private val material: Material,
-    private val ore: Ore
+    private val ore: Ore,
+    private val onClose: (Player) -> Unit
 ) : Container(9, "${material.getDisplayName()} 설정") {
     override fun onCreate() {
         listOf(
@@ -149,5 +152,9 @@ class OreDetailSettingView(
                 }
             }
         }.build()
+    }
+
+    override fun onDestroy(event: InventoryCloseEvent) {
+        onClose(event.player as Player)
     }
 }

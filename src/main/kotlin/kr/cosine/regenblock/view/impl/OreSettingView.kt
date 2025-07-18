@@ -48,7 +48,7 @@ class OreSettingView(
                 when (event.getClickType()) {
                     ClickType.LEFT -> {
                         player.playButtonClickSound()
-                        val oreDetailSettingView = OreDetailSettingView(oreGroupRegistry, material, element.value)
+                        val oreDetailSettingView = OreDetailSettingView(oreGroupRegistry, material, element.value, ::delayReopen)
                         openContainer(oreDetailSettingView, player)
                     }
 
