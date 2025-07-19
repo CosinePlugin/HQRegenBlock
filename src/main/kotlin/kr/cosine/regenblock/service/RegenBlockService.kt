@@ -59,7 +59,7 @@ class RegenBlockService(
             }
         }
         if (ore.isChance(ChanceType.BONUS_DROP)) {
-            val bonusDrop = ore.findDrop(DropType.BONUS)?.itemStack
+            val bonusDrop = ore.findDrop(DropType.BONUS)?.clone()
             if (bonusDrop != null) {
                 world.dropItemNaturally(location, bonusDrop)
                 NotificationType.BONUS_DROP.notice(player) {

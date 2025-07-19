@@ -1,6 +1,6 @@
 name: HQRegenBlock
 main: kr.cosine.regenblock.HQRegenBlock
-version: 1.0.0
+version: 1.1.0
 api-version: 1.20
 author: Cosine_A
 depend:

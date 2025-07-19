@@ -42,7 +42,7 @@ class OreDetailSettingView(
             setLore(ore.getDropLore(dropType))
             setLeftClickFunction { event ->
                 val player = event.getWhoClicked()
-                val dropSettingView = DropSettingView(material, dropType, drop?.itemStack, ::delayReopen) { newDrop ->
+                val dropSettingView = DropSettingView(material, dropType, drop?.clone(), ::delayReopen) { newDrop ->
                     ore.setDrop(dropType, newDrop)
                     oreGroupRegistry.isChanged = true
                     player.sendMessage("§a${dropType.displayName} 드랍 아이템이 설정되었습니다.")
