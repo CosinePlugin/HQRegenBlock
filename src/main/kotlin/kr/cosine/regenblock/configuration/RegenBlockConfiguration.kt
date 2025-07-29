@@ -14,6 +14,8 @@ class RegenBlockConfiguration(
 ) {
     val regenDuration get() = configuration.getLong("regen-duration", 20) * 50L
 
+    val inventoryGive get() = configuration.getBoolean("inventory-give")
+
     fun load() {
         loadNotification()
     }

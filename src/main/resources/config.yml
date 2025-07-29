@@ -1,5 +1,10 @@
+config-version: 1
+
 # 리젠 대기 시간 (틱 단위)
 regen-duration: 20
+
+# 인벤토리 지급
+inventory-give: false
 
 notification:
   impossible-tool:
@@ -31,3 +36,11 @@ notification:
       fade-in: 5
       duration: 20
       fade-out: 5
+
+  lack-inventory-space:
+    sound:
+      name: "minecraft:block.anvil.place"
+      volume: 0.5
+      pitch: 1
+    messages:
+      - "&c인벤토리에 공간이 없습니다."

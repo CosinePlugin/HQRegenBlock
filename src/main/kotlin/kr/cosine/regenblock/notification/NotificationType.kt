@@ -7,7 +7,8 @@ enum class NotificationType(
 ) {
     IMPOSSIBLE_TOOL,
     EXTRA_DROP,
-    BONUS_DROP;
+    BONUS_DROP,
+    LACK_INVENTORY_SPACE;
 
     fun addNotifications(vararg notifications: Notification?) {
         notifications.forEach { notification ->

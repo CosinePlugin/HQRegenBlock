@@ -37,6 +37,10 @@ data class Ore(
         chanceMap[chanceType] = chance
     }
 
+    fun hasExtraDropCount(): Boolean {
+        return extraDropCountMap.isNotEmpty()
+    }
+
     fun getExtraDropCountMap(): Map<Int, Double> {
         return extraDropCountMap
     }

@@ -1,6 +1,7 @@
 package kr.cosine.regenblock.service
 
 import kr.cosine.regenblock.configuration.RegenBlockConfiguration
+import kr.cosine.regenblock.data.Ore
 import kr.cosine.regenblock.data.RegenBlockQueue
 import kr.cosine.regenblock.data.RegenBlockRegion
 import kr.cosine.regenblock.enumeration.ChanceType
@@ -11,10 +12,12 @@ import kr.cosine.regenblock.registry.OreGroupRegistry
 import kr.cosine.regenblock.registry.RegenBlockQueueRegistry
 import kr.cosine.regenblock.registry.RegenBlockRegionRegistry
 import kr.hqservice.framework.global.core.component.Service
+import kr.hqservice.framework.inventory.util.hasSpace
 import kr.hqservice.framework.nms.extension.getDisplayName
 import org.bukkit.Location
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 
 @Service
 class RegenBlockService(
@@ -44,33 +47,45 @@ class RegenBlockService(
             NotificationType.IMPOSSIBLE_TOOL.notice(player)
             return false
         }
-        val world = block.world
-        world.dropItemNaturally(location, result.clone())
+        if (!player.giveOrDrop(location, result.clone())) return false
 
-        if (ore.isChance(ChanceType.EXTRA_DROP)) {
-            val extraDropCount = ore.getExtraDropCount()
-            val extraDrop = result.clone().apply {
-                amount = extraDropCount
-            }
-            world.dropItemNaturally(location, extraDrop)
-            NotificationType.EXTRA_DROP.notice(player) {
-                it.replace(NotificationType.ITEM_REPLACER, result.getDisplayName())
-                    .replace(NotificationType.AMOUNT_REPLACER, extraDropCount.format())
-            }
-        }
-        if (ore.isChance(ChanceType.BONUS_DROP)) {
-            val bonusDrop = ore.findDrop(DropType.BONUS)?.clone()
-            if (bonusDrop != null) {
-                world.dropItemNaturally(location, bonusDrop)
-                NotificationType.BONUS_DROP.notice(player) {
-                    it.replace(NotificationType.ITEM_REPLACER, bonusDrop.getDisplayName())
-                        .replace(NotificationType.AMOUNT_REPLACER, bonusDrop.amount.format())
+        fun drop(chanceType: ChanceType, itemStack: ItemStack) {
+            if (ore.isChance(chanceType)) {
+                player.giveOrDrop(location, itemStack)
+                chanceType.notificationType?.notice(player) {
+                    it.replace(NotificationType.ITEM_REPLACER, itemStack.getDisplayName())
+                        .replace(NotificationType.AMOUNT_REPLACER, itemStack.amount.format())
                 }
             }
         }
 
+        if (ore.hasExtraDropCount()) {
+            val extraDrop = result.clone().apply {
+                amount = ore.getExtraDropCount()
+            }
+            drop(ChanceType.EXTRA_DROP, extraDrop)
+        }
+        val bonusDrop = ore.findDrop(DropType.BONUS)
+        if (bonusDrop != null) {
+            drop(ChanceType.BONUS_DROP, bonusDrop.clone())
+        }
+
         val regenBlockQueue = RegenBlockQueue(location, nextOreMaterial, regenBlockConfiguration.regenDuration)
         regenBlockQueueRegistry.addRegenBlockQueue(regenBlockQueue)
+        return true
+    }
+
+
+    private fun Player.giveOrDrop(location: Location, itemStack: ItemStack): Boolean {
+        if (regenBlockConfiguration.inventoryGive) {
+            if (!inventory.hasSpace(itemStack)) {
+                NotificationType.LACK_INVENTORY_SPACE.notice(this)
+                return false
+            }
+            inventory.addItem(itemStack)
+        } else {
+            world.dropItemNaturally(location, itemStack)
+        }
         return true
     }
 
