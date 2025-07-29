@@ -12,6 +12,8 @@ import kr.hqservice.framework.yaml.config.HQYamlConfiguration
 class RegenBlockConfiguration(
     private val configuration: HQYamlConfiguration
 ) {
+    val queueAutoSavePeriod get() = configuration.getLong("queue-auto-save-period", 6000)
+
     val regenDuration get() = configuration.getLong("regen-duration", 20) * 50L
 
     val inventoryGive get() = configuration.getBoolean("inventory-give")

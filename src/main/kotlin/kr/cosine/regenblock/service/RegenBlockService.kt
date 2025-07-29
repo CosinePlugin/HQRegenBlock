@@ -26,28 +26,34 @@ class RegenBlockService(
     private val oreGroupRegistry: OreGroupRegistry,
     private val regenBlockQueueRegistry: RegenBlockQueueRegistry
 ) {
-    fun regen(player: Player, block: Block): Boolean? {
+    sealed interface RegenBlockResult {
+        object InvalidRegenBlock : RegenBlockResult
+        object Fail : RegenBlockResult
+        object Success : RegenBlockResult
+    }
+
+    fun regen(player: Player, block: Block): RegenBlockResult {
         val location = block.location
-        val regenBlockRegion = findRegenBlockRegion(location) ?: return null
-        val oreHolderKey = regenBlockRegion.findOreGroupKey() ?: return null
-        val oreHolder = oreGroupRegistry.findOreGroup(oreHolderKey) ?: return null
-        val ore = oreHolder[block.type] ?: return false
+        val regenBlockRegion = findRegenBlockRegion(location) ?: return RegenBlockResult.InvalidRegenBlock
+        val oreHolderKey = regenBlockRegion.findOreGroupKey() ?: return RegenBlockResult.InvalidRegenBlock
+        val oreHolder = oreGroupRegistry.findOreGroup(oreHolderKey) ?: return RegenBlockResult.InvalidRegenBlock
+        val ore = oreHolder[block.type] ?: return RegenBlockResult.Fail
         val result = ore.findDrop(DropType.DEFAULT)
         if (result == null) {
             player.sendMessage("§c광물이 설정되어 있지 않습니다. 관리자에게 문의해주세요.")
-            return false
+            return RegenBlockResult.Fail
         }
         val nextOreMaterial = oreHolder.randomOrNull() ?: run {
             player.sendMessage("§c광석이 설정되어 있지 않습니다. 관리자에게 문의해주세요.")
-            return false
+            return RegenBlockResult.Fail
         }
         // 올바른 도구로 캤을 때만
         val itemStack = player.inventory.itemInMainHand
         if (!player.isOp && block.getDrops(itemStack, player).isEmpty()) {
             NotificationType.IMPOSSIBLE_TOOL.notice(player)
-            return false
+            return RegenBlockResult.Fail
         }
-        if (!player.giveOrDrop(location, result.clone())) return false
+        if (!player.giveOrDrop(location, result.clone())) return RegenBlockResult.Fail
 
         fun drop(chanceType: ChanceType, itemStack: ItemStack) {
             if (ore.isChance(chanceType)) {
@@ -72,7 +78,7 @@ class RegenBlockService(
 
         val regenBlockQueue = RegenBlockQueue(location, nextOreMaterial, regenBlockConfiguration.regenDuration)
         regenBlockQueueRegistry.addRegenBlockQueue(regenBlockQueue)
-        return true
+        return RegenBlockResult.Success
     }
 
 

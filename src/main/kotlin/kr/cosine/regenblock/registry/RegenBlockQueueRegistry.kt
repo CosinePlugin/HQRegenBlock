@@ -18,9 +18,12 @@ class RegenBlockQueueRegistry : Restorable<RegenBlockQueueRegistry> {
 
     fun addRegenBlockQueue(regenBlockQueue: RegenBlockQueue) {
         regenBlockQueues.add(regenBlockQueue)
+        isChanged = true
     }
 
     fun removeIf(predicate: (RegenBlockQueue) -> Boolean) {
-        regenBlockQueues.removeIf(predicate)
+        if (regenBlockQueues.removeIf(predicate)) {
+            isChanged = true
+        }
     }
 }

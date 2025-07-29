@@ -1,4 +1,7 @@
-config-version: 1
+config-version: 2
+
+# 광석 생성 대기열 자동 저장 주기 (틱 단위)
+queue-auto-save-period: 6000
 
 # 리젠 대기 시간 (틱 단위)
 regen-duration: 20

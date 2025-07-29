@@ -21,9 +21,19 @@ class RegenBlockListener(
     @Subscribe(ignoreCancelled = true)
     fun onBlockBreakInRegion(event: BlockBreakEvent) {
         val player = event.player
-        val isRegen = regenBlockService.regen(player, event.block) ?: return
-        if (!player.isOp && !isRegen) {
-            event.isCancelled = true
+        when (regenBlockService.regen(player, event.block)) {
+            RegenBlockService.RegenBlockResult.Fail -> {
+                if (!player.isOp) {
+                    event.isCancelled = true
+                }
+            }
+
+            RegenBlockService.RegenBlockResult.Success -> {
+                event.isDropItems = false
+                event.expToDrop = 0
+            }
+
+            else -> {}
         }
     }
 
