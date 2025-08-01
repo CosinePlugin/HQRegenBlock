@@ -37,6 +37,9 @@ class OreSettingView(
                     getExtraDropCountLore(ore),
                     getChanceLore(ore, ChanceType.BONUS_DROP),
                     getDropLore(ore, DropType.BONUS),
+                    getChanceLore(ore, ChanceType.EXPERIENCE_DROP),
+                    getExperienceRangeLore(ore),
+                    getFortuneEnabledLore(ore),
                     listOf(
                         "§a좌클릭 §7▸ §f세부 설정으로 이동합니다.",
                         "§c쉬프트+우클릭 §7▸ §f목록에서 제거합니다.",
@@ -75,6 +78,14 @@ class OreSettingView(
 
     private fun getExtraDropCountLore(ore: Ore): List<String> {
         return listOf("§6추가 드랍 개수별 확률") + ore.getExtraDropCountLore() + emptyLore
+    }
+
+    private fun getExperienceRangeLore(ore: Ore): List<String> {
+        return listOf("§6경험치 범위", ore.getExperienceRangeLore()) + emptyLore
+    }
+
+    private fun getFortuneEnabledLore(ore: Ore): List<String> {
+        return listOf("§6행운 적용", ore.getFortuneEnabledLore()) + emptyLore
     }
 
     override fun onClick(event: InventoryClickEvent) {

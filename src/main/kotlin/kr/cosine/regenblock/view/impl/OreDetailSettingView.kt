@@ -1,5 +1,6 @@
 package kr.cosine.regenblock.view.impl
 
+import kr.cosine.regenblock.data.ExperienceRange
 import kr.cosine.regenblock.data.Ore
 import kr.cosine.regenblock.enumeration.ChanceType
 import kr.cosine.regenblock.enumeration.DropType
@@ -29,7 +30,10 @@ class OreDetailSettingView(
             getChanceSettingButton(ChanceType.EXTRA_DROP),
             getExtraDropCountSettingButton(),
             getChanceSettingButton(ChanceType.BONUS_DROP),
-            getDropSettingButton(DropType.BONUS)
+            getDropSettingButton(DropType.BONUS),
+            getChanceSettingButton(ChanceType.EXPERIENCE_DROP),
+            getExperienceRangeSettingButton(),
+            getFortuneSwitchButton()
         ).forEachIndexed { index, button ->
             button.setSlot(this, index)
         }
@@ -150,6 +154,58 @@ class OreDetailSettingView(
 
                     else -> {}
                 }
+            }
+        }.build()
+    }
+
+    private fun getExperienceRangeSettingButton(): HQButton {
+        return HQButtonBuilder(Material.EXPERIENCE_BOTTLE).apply {
+            setDisplayName("§6경험치 범위")
+            setLore(listOf(ore.getExperienceRangeLore()))
+            setLeftClickFunction { event ->
+                val player = event.getWhoClicked()
+                player.playButtonClickSound()
+                player.sendMessage("§a경험치 범위를 입력해주세요. §c(취소: -)")
+                player.sendMessage("§7└ ex: 5~10")
+                startChatObserver(player) {
+                    val split = it.split("~")
+                    if (split.size != 2) {
+                        player.sendMessage("§c올바른 형식이 아닙니다. '~'로 구분하여 입력해주세요.")
+                        return@startChatObserver false
+                    }
+                    val min = split[0].toIntOrNull() ?: run {
+                        player.sendMessage("§c최소 경험치에는 숫자만 입력할 수 있습니다.")
+                        return@startChatObserver false
+                    }
+                    val max = split[1].toIntOrNull() ?: run {
+                        player.sendMessage("§c최대 경험치에는 숫자만 입력할 수 있습니다.")
+                        return@startChatObserver false
+                    }
+                    if (min < 0 || max < 0 || min > max) {
+                        player.sendMessage("§c올바른 경험치 범위를 입력해주세요.")
+                        return@startChatObserver false
+                    }
+                    val experienceRange = ExperienceRange(min, max)
+                    ore.setExperienceRange(experienceRange)
+                    oreGroupRegistry.isChanged = true
+                    player.sendMessage("§a경험치 범위가 $min~${max}(으)로 설정되었습니다.")
+                    return@startChatObserver true
+                }
+            }
+        }.build()
+    }
+
+    private fun getFortuneSwitchButton(): HQButton {
+        val material = if (ore.isFortuneEnabled()) Material.LIME_WOOL else Material.RED_WOOL
+        return HQButtonBuilder(material).apply {
+            setDisplayName("§6행운 적용")
+            setLore(listOf(ore.getFortuneEnabledLore()))
+            setLeftClickFunction { event ->
+                val player = event.getWhoClicked()
+                player.playButtonClickSound()
+                ore.switchFortuneEnabled()
+                oreGroupRegistry.isChanged = true
+                refresh()
             }
         }.build()
     }

@@ -11,7 +11,9 @@ import org.bukkit.inventory.ItemStack
 data class Ore(
     private val dropMap: MutableMap<DropType, ItemStackWrapper>,
     private val chanceMap: MutableMap<ChanceType, Double>,
-    private val extraDropCountMap: MutableMap<Int, Double>
+    private val extraDropCountMap: MutableMap<Int, Double>,
+    private var experienceRange: ExperienceRange? = null,
+    private var isFortuneEnabled: Boolean = false
 ) {
     fun findDrop(dropType: DropType): ItemStackWrapper? {
         return dropMap[dropType]
@@ -57,6 +59,22 @@ data class Ore(
         return extraDropCountMap.randomOrNull() ?: 0
     }
 
+    fun findExperienceRange(): ExperienceRange? {
+        return experienceRange
+    }
+
+    fun setExperienceRange(experienceRange: ExperienceRange?) {
+        this.experienceRange = experienceRange
+    }
+
+    fun isFortuneEnabled(): Boolean {
+        return isFortuneEnabled
+    }
+
+    fun switchFortuneEnabled() {
+        isFortuneEnabled = !isFortuneEnabled
+    }
+
     fun getChanceLore(chanceType: ChanceType): String {
         return "§f${getChance(chanceType).format()}%"
     }
@@ -79,6 +97,20 @@ data class Ore(
                 "§f${count}개 §7/ §a${chance.format()}%"
             }
         }
+    }
+
+    fun getFortuneEnabledLore(): String {
+        return if (isFortuneEnabled) {
+            "§a활성화"
+        } else {
+            "§c비활성화"
+        }
+    }
+
+    fun getExperienceRangeLore(): String {
+        return experienceRange?.let {
+            "§f${it.min}~${it.max}"
+        } ?: "§8설정되지 않음"
     }
 
     companion object {

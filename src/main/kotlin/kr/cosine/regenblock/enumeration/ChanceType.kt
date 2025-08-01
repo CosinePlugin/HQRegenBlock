@@ -7,7 +7,8 @@ enum class ChanceType(
 ) {
     REGEN("리젠"),
     EXTRA_DROP("추가 드랍"),
-    BONUS_DROP("보너스 드랍");
+    BONUS_DROP("보너스 드랍"),
+    EXPERIENCE_DROP("경험치 드랍");
 
     val notificationType = NotificationType.of(name)
 }

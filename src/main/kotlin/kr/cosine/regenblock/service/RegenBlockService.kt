@@ -1,7 +1,6 @@
 package kr.cosine.regenblock.service
 
 import kr.cosine.regenblock.configuration.RegenBlockConfiguration
-import kr.cosine.regenblock.data.Ore
 import kr.cosine.regenblock.data.RegenBlockQueue
 import kr.cosine.regenblock.data.RegenBlockRegion
 import kr.cosine.regenblock.enumeration.ChanceType
@@ -16,8 +15,11 @@ import kr.hqservice.framework.inventory.util.hasSpace
 import kr.hqservice.framework.nms.extension.getDisplayName
 import org.bukkit.Location
 import org.bukkit.block.Block
+import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.ExperienceOrb
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import kotlin.random.Random
 
 @Service
 class RegenBlockService(
@@ -53,7 +55,17 @@ class RegenBlockService(
             NotificationType.IMPOSSIBLE_TOOL.notice(player)
             return RegenBlockResult.Fail
         }
-        if (!player.giveOrDrop(location, result.clone())) return RegenBlockResult.Fail
+        val experienceRange = ore.findExperienceRange()
+        if (experienceRange != null && ore.isChance(ChanceType.EXPERIENCE_DROP)) {
+            val experience = experienceRange.random()
+            location.spawnExperience(experience)
+        }
+        val defaultResult = result.clone().apply {
+            if (ore.isFortuneEnabled()) {
+                amount += itemStack.getBonusAmountByFortune()
+            }
+        }
+        if (!player.giveOrDrop(location, defaultResult)) return RegenBlockResult.Fail
 
         fun drop(chanceType: ChanceType, itemStack: ItemStack) {
             if (ore.isChance(chanceType)) {
@@ -81,6 +93,21 @@ class RegenBlockService(
         return RegenBlockResult.Success
     }
 
+    private fun Location.spawnExperience(experience: Int) {
+        if (experience > 0) {
+            world?.spawn(this, ExperienceOrb::class.java) {
+                it.experience = experience
+            }
+        }
+    }
+
+    private fun ItemStack.getBonusAmountByFortune(): Int {
+        val fortune = getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS)
+        if (fortune == 0) return 0
+        val roll = Random.nextInt(fortune + 2) - 1
+        val bonus = if (roll < 0) 0 else roll
+        return bonus
+    }
 
     private fun Player.giveOrDrop(location: Location, itemStack: ItemStack): Boolean {
         if (regenBlockConfiguration.inventoryGive) {
